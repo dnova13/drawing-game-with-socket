@@ -21,8 +21,7 @@ const io = new socketIO.Server(server);
 let sockets = [];
 
 // 소켓 연결. 프론트에서 소켓 연결이 확인 되면 
-//  console.log("somebody connnect") 
+//  console.log("somebody connnect") 이거 출력
 io.on("connection", socket => {
-    console.log("somebody connnect")
-    sockets.push(socket.id);
+    socket.on("helloGuys", () => console.log("the client said hello"));
 });
