@@ -20,8 +20,19 @@ const io = new socketIO.Server(server);
 
 let sockets = [];
 
-// 소켓 연결. 프론트에서 소켓 연결이 확인 되면 
-//  console.log("somebody connnect") 이거 출력
 io.on("connection", socket => {
-    socket.on("helloGuys", () => console.log("the client said hello"));
+
+    // 클라에서 emit 한 메세지 받음.
+    socket.on("newMsg", (data) => {
+
+        socket.broadcast.emit("msgNoti", {
+            msg: data.msg,
+            nickname: socket.nickname || "Anon"
+        })
+    });
+
+    // 클라 단에서 보낸 닉네임 정보를 socket 객체에 등록
+    socket.on("setNickname", ({ nickname }) => {
+        socket.nickname = nickname;
+    });
 });
