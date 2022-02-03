@@ -1,8 +1,9 @@
+import events from "./events";
+
 const socketController = socket => {
-    socket.on("setNickname", ({ nickname }) => {
-        console.log(nickname);
+
+    // 닉네임 셋팅 이벤트
+    socket.on(events.setNickname, ({ nickname }) => {
         socket.nickname = nickname;
     });
 };
-
-export default socketController;

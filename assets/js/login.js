@@ -9,8 +9,13 @@ const nickname = localStorage.getItem(NICKNAME);
 
 // 소켓에 입력한 닉네임 정보 전달.
 const logIn = nickname => {
-    const socket = io("/");
-    socket.emit("setNickname", { nickname });
+    // sockdet -> window.socket 으로 변경. 
+    // window.socket 변경함으로서 다른 사죵자가 내 소켓으로 접근이 가능.
+    window.socket = io("/");
+
+    // ex) window.events = {"setNickname":"setNickname"} 로 객체 저장되어 있으므로.
+    // window.events.setNickname = "setNickname" 이 됨.
+    window.socket.emit(window.events.setNickname, { nickname });
 };
 
 // 닉네임에 따른 로그인 유무 체크
