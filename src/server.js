@@ -2,6 +2,7 @@ import { join } from "path";
 import express from "express";
 import socketIO from "socket.io";
 import logger from "morgan";
+import socketController from "./socketController";
 
 const PORT = 4000;
 const app = express();
@@ -18,9 +19,10 @@ const server = app.listen(PORT, handleListening);
 
 const io = new socketIO.Server(server);
 
-let sockets = [];
+/// 코드 리펙토링 socketController.js 에서 setnicknmae 등 함수 관리
+io.on("connection", socket => socketController(socket));
 
-io.on("connection", socket => {
+/* io.on("connection", socket => {
 
     // 클라에서 emit 한 메세지 받음.
     socket.on("newMsg", (data) => {
@@ -35,4 +37,4 @@ io.on("connection", socket => {
     socket.on("setNickname", ({ nickname }) => {
         socket.nickname = nickname;
     });
-});
+}); */
