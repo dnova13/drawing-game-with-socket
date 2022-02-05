@@ -1,5 +1,6 @@
 
-const notifications = document.getElementById("jsNotifications");
+// const notifications = document.getElementById("jsNotifications");
+const body = document.querySelector("body");
 
 // 알림 프론트 이벤트 동작 함수
 const fireNotification = (text, color) => {
@@ -9,7 +10,8 @@ const fireNotification = (text, color) => {
     notification.style.backgroundColor = color;
     notification.className = "notification";
 
-    notifications.appendChild(notification);
+    // notifications.appendChild(notification);
+    body.appendChild(notification);
 };
 
 export const handleNewUser = ({ nickname }) =>
