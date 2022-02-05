@@ -1,5 +1,7 @@
 /* 채팅창 이벤트 js */
 
+import { getSocket } from "./sockets";
+
 const messages = document.getElementById("jsMessages");
 const sendMsg = document.getElementById("jsSendMsg");
 
@@ -20,10 +22,17 @@ const handleSendMsg = event => {
 
     const input = sendMsg.querySelector("input");
     const { value } = input;
-    input.value = "";
 
+    // 해당 소켓 객체를 가져와서 메세지값 웹소켓 서버에 송출
+    getSocket().emit(window.events.sendMsg, { message: value });
+
+    input.value = "";
     appendMsg(value);
 };
+
+// 서버쪽 소켓에 최신 메세지 전달.
+export const handleNewMessage = ({ message, nickname }) =>
+    appendMsg(message, nickname);
 
 if (sendMsg) {
     sendMsg.addEventListener("submit", handleSendMsg);
