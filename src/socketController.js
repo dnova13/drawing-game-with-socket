@@ -27,19 +27,19 @@ const socketController = socket => {
         broadcast(events.newMsg, { message, nickname: socket.nickname });
     });
 
-    socket.on(events.sendMsg, ({ message }) =>
-        broadcast(events.newMsg, { message, nickname: socket.nickname })
-    );
-
-    /// 마우스 포인트 그림 시작위치 브로드 캐스팅
+    /// 마우스 포인트 그림 시작위치 좌표값 브로드 캐스팅
     socket.on(events.beginPath, ({ x, y }) =>
         broadcast(events.beganPath, { x, y })
     );
 
-    /// 그림 그릴 경우 타 소켓 서버에 브로드 캐스팅
-    socket.on(events.strokePath, ({ x, y }) => {
-        broadcast(events.strokedPath, { x, y });
-        console.log(x, y);
+    /// 그림 그릴 경우 전송된 좌표값, 색 정보 타 소켓 서버에 브로드 캐스팅
+    socket.on(events.strokePath, ({ x, y, color }) => {
+        broadcast(events.strokedPath, { x, y, color });
+    });
+
+    // 그림 채우기 경우, 정보 브로드 캐스팅
+    socket.on(events.fill, ({ color }) => {
+        broadcast(events.filled, { color });
     });
 };
 

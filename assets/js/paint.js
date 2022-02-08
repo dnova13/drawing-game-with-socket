@@ -33,9 +33,14 @@ const beginPath = (x, y) => {
     ctx.moveTo(x, y);
 };
 
-const strokePath = (x, y) => {
+const strokePath = (x, y, color = null) => {
+    let currentColor = ctx.strokeStyle;
+    if (color !== null) {
+        ctx.strokeStyle = color;
+    }
     ctx.lineTo(x, y);
     ctx.stroke();
+    ctx.strokeStyle = currentColor;
 };
 
 // 마우스가 움직이고, 그림 그릴때 그 값을 소켓 전송 해야하므로
@@ -44,16 +49,20 @@ function onMouseMove(event) {
     const x = event.offsetX;
     const y = event.offsetY;
 
-    // 마우스 시작 포인터 지정 및 소켓 전송
+    // 마우스 시작 포인터 지정 및 그 좌표값 소켓 전송
     if (!painting) {
         beginPath(x, y);
         getSocket().emit(window.events.beginPath, { x, y });
     }
 
-    // 그림 그릴 경우 포인터 지정 및 소켓 전송
+    // 그림 그릴 경우 포인터 지정 및 그 좌표값, 색깔 정보 소켓 전송
     else {
         strokePath(x, y);
-        getSocket().emit(window.events.strokePath, { x, y });
+        getSocket().emit(window.events.strokePath, {
+            x,
+            y,
+            color: ctx.strokeStyle
+        });
     }
 }
 
@@ -72,6 +81,19 @@ function handleModeClick() {
         mode.innerText = "Paint";
     }
 }
+
+// 채우기 함수 
+function fill(color = null) {
+    let currentColor = ctx.fillStyle;
+
+    if (color !== null) {
+        ctx.fillStyle = color;
+    }
+
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.fillStyle = currentColor;
+};
+
 
 function handleCanvasClick() {
     if (filling) {
@@ -101,4 +123,5 @@ if (mode) {
 }
 
 export const handleBeganPath = ({ x, y }) => beginPath(x, y);
-export const handleStrokedPath = ({ x, y }) => strokePath(x, y);
+export const handleStrokedPath = ({ x, y, color }) => strokePath(x, y, color);
+export const handleFilled = ({ color }) => fill(color);
