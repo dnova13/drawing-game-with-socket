@@ -26,6 +26,21 @@ const socketController = socket => {
     socket.on(events.sendMsg, ({ message }) => {
         broadcast(events.newMsg, { message, nickname: socket.nickname });
     });
+
+    socket.on(events.sendMsg, ({ message }) =>
+        broadcast(events.newMsg, { message, nickname: socket.nickname })
+    );
+
+    /// 마우스 포인트 그림 시작위치 브로드 캐스팅
+    socket.on(events.beginPath, ({ x, y }) =>
+        broadcast(events.beganPath, { x, y })
+    );
+
+    /// 그림 그릴 경우 타 소켓 서버에 브로드 캐스팅
+    socket.on(events.strokePath, ({ x, y }) => {
+        broadcast(events.strokedPath, { x, y });
+        console.log(x, y);
+    });
 };
 
 export default socketController;

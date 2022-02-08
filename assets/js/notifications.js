@@ -1,4 +1,3 @@
-
 // const notifications = document.getElementById("jsNotifications");
 const body = document.querySelector("body");
 
