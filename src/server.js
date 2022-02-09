@@ -21,7 +21,10 @@ const handleListening = () =>
 
 const server = app.listen(PORT, handleListening);
 
+// io 는 소켓을 관리하는 서버.
 const io = new socketIO.Server(server);
 
 /// 코드 리펙토링 socketController.js 에서 setnicknmae 등 함수 관리
-io.on("connection", socket => socketController(socket));
+// io : 소켓을 관리하는 서버.
+// socket : io 에 연결된 각각의 소켓.
+io.on("connection", socket => socketController(socket, io));
