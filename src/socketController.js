@@ -1,9 +1,16 @@
 import events from "./events";
 import { setInterval } from "timers";
+import { chooseWord } from "./words";
 
 // 소켓에 들어온 클라이언트 정보를 담기 위해 배열 선언
 // 소켓 정보를 계속 유지하기 위헤 메모리 통해 저장.
 let sockets = [];
+
+let inProgress = false;
+let word = null;
+
+// 그림 그리는 사람 랜덤 택
+const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
 
 const socketController = (socket, io) => {
 
@@ -19,9 +26,19 @@ const socketController = (socket, io) => {
     const sendPlayerUpdate = () =>
         superBroadcast(events.playerUpdate, { sockets });
 
+    // 게임 시작 셋팅
+    const startGame = () => {
+        /// 시작할때
+        if (inProgress === false) {
+            inProgress = true;
+            const leader = chooseLeader();
+            word = chooseWord();
+        }
+    };
+
     // 닉네임 셋팅.
     socket.on(events.setNickname, ({ nickname }) => {
-        socket.nickname = nickname;
+        socket.nickname = nickname
 
         // 소켓 배열에 유저 정보를 담음.
         sockets.push({ id: socket.id, points: 0, nickname: nickname });
@@ -29,6 +46,7 @@ const socketController = (socket, io) => {
         // 새로운 유저가 접속했다고 2명이상의 타유저들에게 모두 알림
         broadcast(events.newUser, { nickname });
         sendPlayerUpdate();
+        startGame();
 
         console.log(sockets)
     });
@@ -42,7 +60,7 @@ const socketController = (socket, io) => {
         // 연결 해제한 아이디를 거름. 즉 연결한 아이디만 다시 배열로 모음.
         sockets = sockets.filter(aSocket => {
             console.log(aSocket.id, socket.id)
-            aSocket.id !== socket.id
+            return aSocket.id !== socket.id
         });
 
         console.log(sockets)
