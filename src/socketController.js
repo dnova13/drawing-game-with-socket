@@ -8,6 +8,7 @@ let sockets = [];
 
 let inProgress = false;
 let word = null;
+let leader = null;
 
 // 그림 그리는 사람 랜덤 택
 const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
@@ -31,19 +32,24 @@ const socketController = (socket, io) => {
         /// 시작할때
         if (inProgress === false) {
             inProgress = true;
-            const leader = chooseLeader();
+            leader = chooseLeader();
             word = chooseWord();
 
-            // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
-            // 그림 그릴 사람에게 그려야 워드 전달.
-            io.to(leader.id).emit(events.leaderNotif, { word });
-            superBroadcast(events.gameStarted);
+            // 위의 과정이 빠르므로 2초 정도 딜레이 줘서 겜 실행
+            setTimeout(() => {
+
+                // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
+                // 그림 그릴 사람에게 그려야 워드 전달.
+                superBroadcast(events.gameStarted);
+                io.to(leader.id).emit(events.leaderNotif, { word });
+            }, 2000);
         }
     };
 
     // 게임 종료 알림
     const endGame = () => {
         inProgress = false;
+        superBroadcast(events.gameEnded);
     };
 
     // 닉네임 셋팅.
@@ -59,7 +65,7 @@ const socketController = (socket, io) => {
 
         console.log(sockets)
 
-        if (sockets.length === 1) {
+        if (sockets.length > 1) {
             startGame();
         }
     });
@@ -80,6 +86,13 @@ const socketController = (socket, io) => {
 
         if (sockets.length === 1) {
             endGame();
+        }
+
+        // 연결 해제가 리더일 경우 겜 종료.
+        else if (leader) {
+            if (leader.id === socket.id) {
+                endGame();
+            }
         }
 
         // 다른 유저가 2명이상의 타유저들에게  퇴장햇다고 모두 알림.

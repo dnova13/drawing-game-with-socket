@@ -15,7 +15,8 @@ const events = {
     filled: "filled",
     playerUpdate: "playerUpdate",
     gameStarted: "gameStarted",
-    leaderNotif: "leaderNotif"
+    leaderNotif: "leaderNotif",
+    gameEnded: "gameEnded"
 };
 
 export default events;
