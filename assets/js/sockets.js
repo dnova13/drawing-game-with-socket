@@ -5,7 +5,8 @@ import {
     handlePlayerUpdate,
     handleGameStarted,
     handleLeaderNotif,
-    handleGameEnded
+    handleGameEnded,
+    handleGameStarting
 } from "./players";
 
 let socket = null;
@@ -21,6 +22,7 @@ export const initSockets = aSocket => {
 
     updateSocket(aSocket);
 
+    // 소켓 서버에서 각 이벤트 내용을 전달 받으면(emit, broadcast etc) 각 내용에 따른 메소드 실행.
     socket.on(events.newUser, handleNewUser);
     socket.on(events.disconnected, handleDisconnected);
     socket.on(events.newMsg, handleNewMessage);
@@ -31,4 +33,5 @@ export const initSockets = aSocket => {
     socket.on(events.gameStarted, handleGameStarted);
     socket.on(events.leaderNotif, handleLeaderNotif);
     socket.on(events.gameEnded, handleGameEnded);
+    socket.on(events.gameStarting, handleGameStarting);
 };

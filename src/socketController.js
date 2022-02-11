@@ -35,6 +35,8 @@ const socketController = (socket, io) => {
             leader = chooseLeader();
             word = chooseWord();
 
+            superBroadcast(events.gameStarting);
+
             // 위의 과정이 빠르므로 2초 정도 딜레이 줘서 겜 실행
             setTimeout(() => {
 
@@ -42,7 +44,7 @@ const socketController = (socket, io) => {
                 // 그림 그릴 사람에게 그려야 워드 전달.
                 superBroadcast(events.gameStarted);
                 io.to(leader.id).emit(events.leaderNotif, { word });
-            }, 2000);
+            }, 5000);
         }
     };
 
@@ -50,6 +52,18 @@ const socketController = (socket, io) => {
     const endGame = () => {
         inProgress = false;
         superBroadcast(events.gameEnded);
+    };
+
+    // 점수 획득 
+    const addPoints = id => {
+        sockets = sockets.map(socket => {
+            if (socket.id === id) {
+                socket.points += 10;
+            }
+            return socket;
+        });
+        sendPlayerUpdate();
+        endGame();
     };
 
     // 닉네임 셋팅.
@@ -103,7 +117,19 @@ const socketController = (socket, io) => {
 
     // 메세지 전송에 대한 소켓 전달
     socket.on(events.sendMsg, ({ message }) => {
-        broadcast(events.newMsg, { message, nickname: socket.nickname });
+
+        // 메세지 답입 정답일 경우.
+        if (message === word) {
+            superBroadcast(events.newMsg, {
+                message: `Winner is ${socket.nickname}, word was: ${word}`,
+                nickname: "Bot"
+            });
+
+            /// 정답 맞춘 후 겜 종료.
+            addPoints(socket.id);
+        } else {
+            broadcast(events.newMsg, { message, nickname: socket.nickname });
+        }
     });
 
     /// 마우스 포인트 그림 시작위치 좌표값 브로드 캐스팅
