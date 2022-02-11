@@ -9,6 +9,7 @@ let sockets = [];
 let inProgress = false;
 let word = null;
 let leader = null;
+let timeout = null;
 
 // 그림 그리는 사람 랜덤 택
 const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
@@ -29,22 +30,28 @@ const socketController = (socket, io) => {
 
     // 게임 시작 셋팅
     const startGame = () => {
-        /// 시작할때
-        if (inProgress === false) {
-            inProgress = true;
-            leader = chooseLeader();
-            word = chooseWord();
 
-            superBroadcast(events.gameStarting);
+        if (sockets.length > 1) {
+            /// 시작할때
+            if (inProgress === false) {
+                inProgress = true;
+                leader = chooseLeader();
+                word = chooseWord();
 
-            // 위의 과정이 빠르므로 2초 정도 딜레이 줘서 겜 실행
-            setTimeout(() => {
+                superBroadcast(events.gameStarting);
 
-                // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
-                // 그림 그릴 사람에게 그려야 워드 전달.
-                superBroadcast(events.gameStarted);
-                io.to(leader.id).emit(events.leaderNotif, { word });
-            }, 5000);
+                // 위의 과정이 빠르므로 2초 정도 딜레이 줘서 겜 실행
+                setTimeout(() => {
+
+                    // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
+                    // 그림 그릴 사람에게 그려야 워드 전달.
+                    superBroadcast(events.gameStarted);
+                    io.to(leader.id).emit(events.leaderNotif, { word });
+
+                    // 제한 시간 300 초 후면 겜 종료.
+                    timeout = setTimeout(endGame, 300000);
+                }, 5000);
+            }
         }
     };
 
@@ -52,6 +59,13 @@ const socketController = (socket, io) => {
     const endGame = () => {
         inProgress = false;
         superBroadcast(events.gameEnded);
+
+        if (timeout !== null) {
+            clearTimeout(timeout);
+        }
+
+        // 게임이 끝나고 다시 10초 후 겜 재시작  
+        setTimeout(() => startGame(), 10000);
     };
 
     // 점수 획득 
@@ -78,10 +92,7 @@ const socketController = (socket, io) => {
         sendPlayerUpdate();
 
         console.log(sockets)
-
-        if (sockets.length > 1) {
-            startGame();
-        }
+        startGame();
     });
 
     // 연결 해제

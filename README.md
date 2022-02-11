@@ -7,3 +7,8 @@ Realtime Drawing Game built with SocketIO, Gulp and Node
 ```
 npm run dev:assets
 ```
+
+# server run
+```
+npm run dev:server
+```
