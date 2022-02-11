@@ -33,7 +33,17 @@ const socketController = (socket, io) => {
             inProgress = true;
             const leader = chooseLeader();
             word = chooseWord();
+
+            // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
+            // 그림 그릴 사람에게 그려야 워드 전달.
+            io.to(leader.id).emit(events.leaderNotif, { word });
+            superBroadcast(events.gameStarted);
         }
+    };
+
+    // 게임 종료 알림
+    const endGame = () => {
+        inProgress = false;
     };
 
     // 닉네임 셋팅.
@@ -46,15 +56,18 @@ const socketController = (socket, io) => {
         // 새로운 유저가 접속했다고 2명이상의 타유저들에게 모두 알림
         broadcast(events.newUser, { nickname });
         sendPlayerUpdate();
-        startGame();
 
         console.log(sockets)
+
+        if (sockets.length === 1) {
+            startGame();
+        }
     });
 
     // 연결 해제
     socket.on(events.disconnect, () => {
 
-        console.log(sockets)
+        // console.log(sockets)
 
         // 배열 필터 함수를 이용하여 
         // 연결 해제한 아이디를 거름. 즉 연결한 아이디만 다시 배열로 모음.
@@ -63,7 +76,11 @@ const socketController = (socket, io) => {
             return aSocket.id !== socket.id
         });
 
-        console.log(sockets)
+        // console.log(sockets)
+
+        if (sockets.length === 1) {
+            endGame();
+        }
 
         // 다른 유저가 2명이상의 타유저들에게  퇴장햇다고 모두 알림.
         broadcast(events.disconnected, { nickname: socket.nickname });

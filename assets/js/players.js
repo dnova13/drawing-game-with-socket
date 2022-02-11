@@ -1,4 +1,5 @@
 /* 유저 리스트 프론트 셋팅 */
+import { disableCanvas, hideControls } from "./paint";
 
 const board = document.getElementById("jsPBoard");
 
@@ -12,3 +13,7 @@ const addPlayers = players => {
 };
 
 export const handlePlayerUpdate = ({ sockets }) => addPlayers(sockets);
+export const handleGameStarted = () => {
+    disableCanvas();
+    hideControls();
+};
