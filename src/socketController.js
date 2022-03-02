@@ -10,6 +10,9 @@ let inProgress = false;
 let word = null;
 let leader = null;
 let timeout = null;
+let timeCount = null;
+
+const endTime = 300;
 
 // 그림 그리는 사람 랜덤 택
 const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
@@ -45,11 +48,19 @@ const socketController = (socket, io) => {
 
                     // ws 서버에서 to() 를 특정 소켓 아이디에 메세지 보냄.
                     // 그림 그릴 사람에게 그려야 워드 전달.
-                    superBroadcast(events.gameStarted);
+                    superBroadcast(events.gameStarted, endTime);
                     io.to(leader.id).emit(events.leaderNotif, { word });
 
+                    let time = 0;
+
+                    // 1초 간격으로 메시지를 보여줌
+                    timeCount = setInterval(() => {
+                        time++
+                        superBroadcast(events.timeCount, endTime - time);
+                    }, 1000);
+
                     // 제한 시간 300 초 후면 겜 종료.
-                    timeout = setTimeout(endGame, 300000);
+                    timeout = setTimeout(endGame, endTime*1000);
                 }, 5000);
             }
         }
@@ -63,6 +74,8 @@ const socketController = (socket, io) => {
         if (timeout !== null) {
             clearTimeout(timeout);
         }
+
+        clearTimeout(timeCount);
 
         // 게임이 끝나고 다시 10초 후 겜 재시작  
         setTimeout(() => startGame(), 10000);
